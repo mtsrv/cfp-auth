@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { startRegistration } from '@simplewebauthn/browser'
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 
 const username = ref('username')
 const options = ref(null)
@@ -61,8 +61,22 @@ async function login(event) {
     return
   }
 
-  console.log(loginOptionResponse)
+  const authenticationResponse = await startAuthentication(loginOptionResponse.options)
 
+  const verificationRequest = await fetch(`http://localhost:8787/login/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username.value, authenticationResponse })
+  })
+
+  const verificationResponse = await verificationRequest.json()
+
+  if (verificationRequest.status !== 200) {
+    error.value = verificationResponse.oops ?? 'Something went wrong'
+    return
+  }
+
+  console.log(verificationResponse)
 }
 
 function hideOops(event) {
