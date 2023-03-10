@@ -8,10 +8,11 @@ const error = ref(null)
 
 async function register(event) {
   if (!username.value) {
-    return;
+    error.value = 'Insert an username'
+    return
   }
 
-  const optionRequest = await fetch(`http://127.0.0.1:8787/option`, {
+  const optionRequest = await fetch(`http://127.0.0.1:8787/register/options`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: username.value })
@@ -20,23 +21,54 @@ async function register(event) {
   const optionResponse = await optionRequest.json()
 
   if (optionRequest.status !== 200) {
-    console.log(optionResponse)
-    return;
+    error.value = optionResponse.oops ?? 'Something went wrong'
+    return
   }
 
   const registrationResponse = await startRegistration(optionResponse.options)
 
-  const registerRequest = await fetch(`http://127.0.0.1:8787/register`, {
+  const registerRequest = await fetch(`http://127.0.0.1:8787/register/verify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: username.value, registrationResponse })
   })
 
-  console.log(registerRequest.status)
+  if (registerRequest.status !== 200) {
+    error.value = optionResponse.oops ?? 'Something went wrong'
+    return
+  }
 
   const registerResponse = await registerRequest.json()
   console.log(registerResponse)
 }
+
+async function login(event) {
+  if (!username.value) {
+    error.value = 'Insert an username'
+    return
+  }
+
+  const loginOptionRequest = await fetch(`http://127.0.0.1:8787/login/options`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username.value })
+  })
+
+  const loginOptionResponse = await loginOptionRequest.json()
+
+  if (loginOptionRequest.status !== 200) {
+    error.value = loginOptionResponse.oops ?? 'Something went wrong'
+    return
+  }
+
+  console.log(loginOptionResponse)
+
+}
+
+function hideOops(event) {
+  error.value = null
+}
+
 </script>
 
 <template>
@@ -47,11 +79,20 @@ async function register(event) {
           <input class="input is-primary" type="text" placeholder="username" v-model="username">
         </div>
         <div class="column">
-          <button class="button is-primary is-fullwidth" type="submit" @click="register">Login</button>
+          <p class="buttons is-justify-content-center">
+            <button class="button is-primary" type="submit" @click="login">Login</button>
+            <button class="button is-info" type="submit" @click="register">Register</button>
+          </p>
         </div>
-        <div class="has-text-centered">
-          <p class="is-size-7"> Don't have an account? <a href="#" class="has-text-primary">Sign up</a></p>
-        </div>
+        <article class="message is-danger mt-5" v-if="!!error">
+          <div class="message-header">
+            <p>Oops</p>
+            <button class="delete" aria-label="delete" @click="hideOops"></button>
+          </div>
+          <div class="message-body">
+            {{ error }}
+          </div>
+        </article>
       </div>
     </div>
   </div>
