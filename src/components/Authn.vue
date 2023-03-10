@@ -1,19 +1,31 @@
 <script setup>
 import { ref } from 'vue'
+import { startRegistration } from '@simplewebauthn/browser'
 
 const username = ref('username')
+const options = ref(null)
 const error = ref(null)
-const data = ref(null)
 
-function register(event) {
+async function register(event) {
   if (!username.value) {
     return;
   }
 
-  fetch(`https://google.com`)
-    .then((res) => res.json())
-    .then((json) => (data.value = json))
-    .catch((err) => (error.value = err))
+  const request = await fetch(`http://127.0.0.1:8787/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username.value })
+  })
+
+  const response = await request.json()
+
+  if (request.status !== 200) {
+    console.log(response)
+    return;
+  }
+
+  const registrationResult = await startRegistration(response)
+  console.log(registrationResult)
 }
 </script>
 
