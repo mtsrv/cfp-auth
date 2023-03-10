@@ -11,6 +11,7 @@
   "dependencies": {
     "@simplewebauthn/browser": "^7.1.0",
     "bulma": "^0.9.4",
+    "bulma-toast": "^2.4.2",
     "vue": "^3.2.45"
   },
   "devDependencies": {

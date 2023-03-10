@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { toast } from 'bulma-toast'
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 
 const username = ref('username')
@@ -44,8 +45,14 @@ async function register(event) {
 
 async function login(event) {
   if (!username.value) {
-    error.value = 'Insert an username'
-    return
+    return toast({
+      message: `<b>Oops:</b> missing username`,
+      position: 'top-right',
+      type: 'is-danger',
+      pauseOnHover: true,
+      closeOnClick: true,
+      duration: 1000 * 60,
+    })
   }
 
   const loginOptionRequest = await fetch(`http://127.0.0.1:8787/login/options`, {
@@ -58,7 +65,14 @@ async function login(event) {
 
   if (loginOptionRequest.status !== 200) {
     error.value = loginOptionResponse.oops ?? 'Something went wrong'
-    return
+    return toast({
+      message: `<b>Oops:</b> ${error.value}`,
+      position: 'top-right',
+      type: 'is-danger',
+      pauseOnHover: true,
+      closeOnClick: true,
+      duration: 1000 * 60,
+    })
   }
 
   const authenticationResponse = await startAuthentication(loginOptionResponse.options)
@@ -73,7 +87,14 @@ async function login(event) {
 
   if (verificationRequest.status !== 200) {
     error.value = verificationResponse.oops ?? 'Something went wrong'
-    return
+    return toast({
+      message: `<b>Oops:</b> ${error.value}`,
+      position: 'top-right',
+      type: 'is-danger',
+      pauseOnHover: true,
+      closeOnClick: true,
+      duration: 1000 * 60,
+    })
   }
 
   console.log(verificationResponse)
@@ -98,15 +119,6 @@ function hideOops(event) {
             <button class="button is-info" type="submit" @click="register">Register</button>
           </p>
         </div>
-        <article class="message is-danger mt-5" v-if="!!error">
-          <div class="message-header">
-            <p>Oops</p>
-            <button class="delete" aria-label="delete" @click="hideOops"></button>
-          </div>
-          <div class="message-body">
-            {{ error }}
-          </div>
-        </article>
       </div>
     </div>
   </div>
