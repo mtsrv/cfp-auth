@@ -11,21 +11,31 @@ async function register(event) {
     return;
   }
 
-  const request = await fetch(`http://127.0.0.1:8787/register`, {
+  const optionRequest = await fetch(`http://127.0.0.1:8787/option`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: username.value })
   })
 
-  const response = await request.json()
+  const optionResponse = await optionRequest.json()
 
-  if (request.status !== 200) {
-    console.log(response)
+  if (optionRequest.status !== 200) {
+    console.log(optionResponse)
     return;
   }
 
-  const registrationResult = await startRegistration(response)
-  console.log(registrationResult)
+  const registrationResponse = await startRegistration(optionResponse.options)
+
+  const registerRequest = await fetch(`http://127.0.0.1:8787/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username.value, registrationResponse })
+  })
+
+  console.log(registerRequest.status)
+
+  const registerResponse = await registerRequest.json()
+  console.log(registerResponse)
 }
 </script>
 
