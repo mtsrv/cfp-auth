@@ -23,7 +23,14 @@ async function register(event) {
 
   if (optionRequest.status !== 200) {
     error.value = optionResponse.oops ?? 'Something went wrong'
-    return
+    return toast({
+      message: `<b>Oops:</b> ${error.value}`,
+      position: 'top-right',
+      type: 'is-danger',
+      pauseOnHover: true,
+      closeOnClick: true,
+      duration: 1000 * 60,
+    })
   }
 
   const registrationResponse = await startRegistration(optionResponse.options)
@@ -34,12 +41,20 @@ async function register(event) {
     body: JSON.stringify({ username: username.value, registrationResponse })
   })
 
+  const registerResponse = await registerRequest.json()
+
   if (registerRequest.status !== 200) {
-    error.value = optionResponse.oops ?? 'Something went wrong'
-    return
+    error.value = registerResponse.oops ?? 'Something went wrong'
+    return toast({
+      message: `<b>Oops:</b> ${error.value}`,
+      position: 'top-right',
+      type: 'is-danger',
+      pauseOnHover: true,
+      closeOnClick: true,
+      duration: 1000 * 60,
+    })
   }
 
-  const registerResponse = await registerRequest.json()
   console.log(registerResponse)
 }
 
@@ -76,6 +91,7 @@ async function login(event) {
   }
 
   const authenticationResponse = await startAuthentication(loginOptionResponse.options)
+    .catch(err => console.log)
 
   const verificationRequest = await fetch(`http://localhost:8787/login/verify`, {
     method: 'POST',
